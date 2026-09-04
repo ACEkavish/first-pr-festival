@@ -95,8 +95,9 @@ export default function VictoryOverlay() {
               {alias ? `${alias} is Canon` : "You're Canon Now"}
             </h2>
             <p className="mt-3 text-sm text-silk-dim">
-              Five chapters. Five real Git commands. One Pull Request standing between you and the
-              archive.
+              Eleven chapters. You forked, wove a suit by hand, staged, committed, pushed,
+              branched, collided, and resolved a merge conflict yourself. One Pull Request
+              carries all of it.
             </p>
 
             <div className="mt-6 grid grid-cols-3 gap-3">

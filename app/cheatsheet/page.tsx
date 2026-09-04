@@ -5,7 +5,7 @@ import { getStages, LEVELS } from "@/data/levels";
 
 export const metadata: Metadata = {
   title: "Git-Verse Cheat Sheet | First PR Festival",
-  description: "One-page command reference for all ten chapters. Print it.",
+  description: "One-page command reference for all eleven chapters across two acts. Print it.",
 };
 
 export default function CheatSheet() {

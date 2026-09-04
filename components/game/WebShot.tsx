@@ -25,8 +25,8 @@ export default function WebShot({ shotKey, accent }: { shotKey: number; accent: 
               key={i}
               x1="60"
               y1="60"
-              x2={60 + 52 * Math.cos(a)}
-              y2={60 + 52 * Math.sin(a)}
+              x2={(60 + 52 * Math.cos(a)).toFixed(3)}
+              y2={(60 + 52 * Math.sin(a)).toFixed(3)}
               stroke="rgba(232,230,227,0.9)"
               strokeWidth="2.4"
               strokeLinecap="round"

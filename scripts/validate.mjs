@@ -1,4 +1,4 @@
-// Validates every spider-society/*.json before a PR is merged.
+// Validates every spider-society/*.json and *.html before a PR is merged.
 // Run locally with: node scripts/validate.mjs
 import fs from "node:fs";
 import path from "node:path";
@@ -6,8 +6,10 @@ import path from "node:path";
 const dir = path.join(process.cwd(), "spider-society");
 const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 const errors = [];
-const seen = new Map();
+const jsonUsers = new Map(); // username -> filename
+const htmlUsers = new Map(); // username -> filename
 
+// ── JSON identity records ───────────────────────────────────────────────
 for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".json"))) {
   if (file.startsWith("_")) continue;
   const fail = (msg) => errors.push(`${file}: ${msg}`);
@@ -31,11 +33,17 @@ for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".json"))) {
   if (typeof data.suitColor !== "string" || !HEX.test(data.suitColor)) {
     fail(`"suitColor" must be a hex code like "#FF1B4C"`);
   }
+  const placeholderVals = ["Your Name", "Your Spider-Alias", "your-github-username"];
+  for (const key of ["name", "alias", "githubUsername"]) {
+    if (placeholderVals.includes(data[key])) {
+      fail(`"${key}" is still the template placeholder — put your own details in`);
+    }
+  }
 
   const user = String(data.githubUsername ?? "").toLowerCase();
   if (user) {
-    if (seen.has(user)) fail(`duplicate githubUsername — already claimed in ${seen.get(user)}`);
-    else seen.set(user, file);
+    if (jsonUsers.has(user)) fail(`duplicate githubUsername — already claimed in ${jsonUsers.get(user)}`);
+    else jsonUsers.set(user, file);
     const expected = `${user}.json`;
     if (file.toLowerCase() !== expected) {
       fail(`file should be named "${expected}" to match githubUsername`);
@@ -59,13 +67,13 @@ for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".html"))) {
   if (/<script/i.test(body)) {
     fail("contains a <script> tag — cards are HTML and CSS only");
   }
-  if (/\son\w+\s*=/i.test(raw)) {
+  if (/\son\w+\s*=/i.test(body)) {
     fail("contains an inline event handler (onclick=, onload=, ...) — not allowed");
   }
   if (/<iframe/i.test(body)) {
     fail("contains an <iframe> — not allowed");
   }
-  if (!/<style[\s>]/i.test(raw)) {
+  if (!/<style[\s>]/i.test(body)) {
     fail("has no <style> block — the CSS must be internal, inside the card");
   }
 
@@ -89,14 +97,19 @@ for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".html"))) {
     if (file.toLowerCase() !== expected) {
       fail(`file should be named "${expected}" to match data-github`);
     }
-    if (seen.has(user) && seen.get(user) !== file) {
-      // A JSON and an HTML card by the same person is fine — HTML wins.
-      if (!seen.get(user).endsWith(".json")) {
-        fail(`duplicate card — already claimed in ${seen.get(user)}`);
-      }
-    } else {
-      seen.set(user, file);
-    }
+    if (htmlUsers.has(user)) fail(`duplicate card — already claimed in ${htmlUsers.get(user)}`);
+    else htmlUsers.set(user, file);
+  }
+}
+
+// ── Cross-check: Chapter 2 asks for BOTH a .json identity record and an
+// .html card. Act II (Ch 6-9) opens "your json file" by name — a student
+// with only an .html file hits a missing-file wall mid-afternoon. ────────
+for (const [user, htmlFile] of htmlUsers) {
+  if (!jsonUsers.has(user)) {
+    errors.push(
+      `${htmlFile}: found an HTML card for "${user}" but no matching ${user}.json — Chapter 2 asks for both (the JSON is your identity record, the HTML is your suit).`,
+    );
   }
 }
 
@@ -106,4 +119,5 @@ if (errors.length) {
   console.error("");
   process.exit(1);
 }
-console.log(`✅ ${seen.size} Spider-ID(s) validated.`);
+const total = new Set([...jsonUsers.keys(), ...htmlUsers.keys()]).size;
+console.log(`✅ ${total} Spider-ID(s) validated.`);

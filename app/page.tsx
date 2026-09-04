@@ -5,12 +5,12 @@ import JoinPanel from "@/components/JoinPanel";
 import SocietyGrid from "@/components/SocietyGrid";
 import StatsBar from "@/components/StatsBar";
 import WebBackground from "@/components/WebBackground";
+import { REPO_URL } from "@/data/levels";
 import { getSocietyStats, getSpiderSociety } from "@/utils/getData";
 
 // The roster only changes when a PR is merged, so bake it into the build.
 export const dynamic = "force-static";
 
-const REPO_URL = "https://github.com/your-org/first-pr-festival";
 
 export default function Home() {
   const members = getSpiderSociety();
@@ -70,7 +70,7 @@ export default function Home() {
           <StatsBar
             stats={[
               { label: "Anomalies Merged", value: stats.anomaliesMerged, accent: "#E62429" },
-              { label: "Dimensions Linked", value: stats.dimensions, accent: "#FF3B3B" },
+              { label: "Hand-Woven Suits", value: stats.handWoven, accent: "#FF3B3B" },
               { label: "Unique Abilities", value: stats.uniqueSkills, accent: "#E8E6E3" },
               { label: "Top Ability", value: stats.topSkill.toUpperCase(), accent: "#C1121F" },
             ]}

@@ -6,15 +6,23 @@ Everything you need on the day. Keep this open on your phone.
 
 ## Before the event
 
-- [ ] Set `REPO_URL` in `data/levels.ts` to the real repo. It drives the
-      Chapter 1 link and every "Submit PR" button. **Nothing else needs changing.**
-- [ ] Delete the three sample files (`octocat.json`, `gaearon.json`,
-      `leerob.json`) from `spider-society/` so the roster starts empty.
+- [x] `REPO_URL` in `data/levels.ts` already points at the real repo
+      (`Jay-Naik2526/first-pr-festival`). It drives the Chapter 1 link and
+      every "Submit PR" button.
+- [ ] Delete the sample files (`octocat.json`, `gaearon.json`, `leerob.json`,
+      `jaynaik.json`, `jaynaik.html`) from `spider-society/` so the roster
+      starts empty.
+- [ ] **Set up branch protection on `main`** — see `SECURITY.md` §3. This repo
+      hosts the live site AND takes ~100 public PRs into the same tree; without
+      this, CI passing is only a suggestion, not a gate.
+- [ ] **Authenticate `gh` CLI** (`gh auth login`) on the machine you'll merge
+      from. Don't do first-time auth live in front of the room.
 - [ ] Deploy to Vercel. Import the repo, accept defaults, done.
 - [ ] Confirm the deploy: `/` shows the empty roster, `/game` loads Chapter 0,
       `/cheatsheet` prints cleanly.
 - [ ] Print the cheat sheet, one per student.
-- [ ] Enable branch protection off / merges on — you'll be merging fast.
+- [ ] Read `SECURITY.md` once — it's short, and it's what stands between a
+      public repo taking 100 strangers' PRs and something going wrong.
 - [ ] Send the pre-work email (below) **48 hours ahead**. This is the single
       highest-leverage thing you can do.
 
@@ -39,32 +47,63 @@ Every student who does this saves you ~30 minutes on the day.
 | 11:00–11:20 | Story hook, demo `/game` on the projector | Don't explain Git yet. Sell the story. |
 | 11:20–11:50 | **Chapter 0 gate** | Nobody proceeds until `git --version` answers |
 | 11:50–12:50 | Act I (Ch 1–5) | Push auth is where they'll pile up |
-| 12:50–13:15 | Merge PRs live, roster reveal | The best moment of the day |
-| 13:15–14:00 | Lunch | Merge stragglers while they eat |
+| 12:50–13:15 | **Open-PR count-up on the projector** (not a merge) | "87 anomalies awaiting merge" — see below |
+| 13:15–14:00 | Lunch | PRs stay OPEN. Do not merge yet. |
 | 14:00–14:15 | Peer review warm-up | Everyone reviews their neighbour's PR |
-| 14:15–15:05 | Act II (Ch 6–9) | Conflict Forge first, real file second |
-| 15:05–15:25 | Speedrun leaderboard | Keeps fast finishers busy |
-| 15:25–16:00 | Final reveal, prizes | |
+| 14:15–15:15 | Act II (Ch 6–9) | Conflict Forge first, real file second |
+| 15:15–15:35 | Speedrun leaderboard | Keeps fast finishers busy |
+| 15:35–15:50 | **The one merge pass** (batch, deploy paused) | `scripts/merge-all-prs.sh` |
+| 15:50–16:00 | Roster reveal, prizes | Everyone's card appears at once |
 
 **Do not skip the Chapter 0 gate.** Without `user.name` / `user.email` set,
 every student hits `*** Please tell me who you are` at Chapter 4 *at the same
 moment*, and you lose 20 minutes to one error message.
 
+**⚠️ Do not merge at lunch.** Chapter 9's entire lesson is that a merged PR
+stays open and *updates itself* when a student pushes more commits — "a PR is
+alive." A merged PR is closed on GitHub and **cannot be reopened**. If you
+merge at lunch, every student's Act II afternoon (branching, the villain/hero
+split, resolving their own conflict) pushes into a closed PR and **never
+reaches the roster at all** — three hours of real work with no artifact, and
+the Chapter 9 payoff becomes a projector-wide anticlimax instead of the
+strongest beat of the day. Keep every PR open until the single merge pass at
+15:35. For the lunch beat, put the **open PR list** on the projector instead —
+scrolling past 90 names waiting to be merged is its own strong moment, and it
+costs you nothing.
+
 ---
 
-## Merging PRs fast
+## Merging PRs fast — the one pass, at 15:35
 
-You'll get ~60 PRs in a 30-minute window. Per PR:
+Merging ~100 PRs one at a time through the GitHub web UI takes 25–35 minutes
+of solid clicking, and if Vercel's auto-deploy is left on, each merge kicks
+off a separate rebuild — 100 rebuilds queue behind each other and can burn
+through Vercel Hobby's daily deployment cap before you're even done merging.
+Do it as one deliberate operation instead:
 
-1. CI (`Validate Spider-IDs`) must be green — it checks filename, schema,
-   3 skills, hex colour, and duplicate usernames.
-2. Confirm it's exactly **one new file** named `<their-username>.json`.
-3. Squash and merge.
+1. **Pause Vercel auto-deploy.** Project → Settings → Git → toggle off
+   automatic deployments for the `main` branch. No merge will trigger a build
+   while this is off.
+2. **Dry run the merge list**: `./scripts/merge-all-prs.sh` (no `--go`) prints
+   every open PR and how many have every CI check green. Skim it — this is
+   your last chance to notice something odd before 100 merges happen.
+3. **Merge everything green**: `./scripts/merge-all-prs.sh --go`. It squash-merges
+   every PR whose checks all passed, using the GitHub CLI (`gh`) so there's no
+   clicking. PRs with red checks are left open — call the student over.
+4. **Turn auto-deploy back on**, then trigger **one manual redeploy**
+   (Vercel dashboard → Deployments → Redeploy, or `vercel --prod` from the CLI).
+   One build, ~60–90 seconds, contains every merged card.
+5. **Refresh the roster on the projector.** Everyone's card appears together.
 
-If CI is red, comment the failure line and let them fix it — that's the lesson.
+If `gh` isn't set up yet: `gh auth login` once, before the event — don't do
+first-time auth in front of the room. Practise the whole sequence on 2–3 test
+PRs beforehand.
 
-Vercel rebuilds in ~60–90s per merge. Merge in batches of ten, then refresh the
-roster on the projector so cards appear in visible waves.
+This was load-tested with 104 simultaneous roster entries (a mix of JSON and
+hand-woven HTML cards): page load ~216ms, ~3,000 DOM nodes, ~7MB JS heap, zero
+console errors. The `loading="lazy"` attribute on each card's iframe means
+only cards near the viewport actually render, so this comfortably holds at
+100 participants.
 
 ---
 
@@ -121,7 +160,7 @@ handling 60 individual cases.
 | `pathspec 'main' did not match` | Their default branch is `master`. Use that. |
 | **"It merged with no conflict!"** | They edited *different* lines on each branch. Redo changing the **same** line (the alias) on both. |
 | `Already up to date` | They didn't commit the upgraded form on `main`. Both branches must differ. |
-| `local changes would be overwritten` | Uncommitted work. Commit it, or `git stash`. |
+| `local changes would be overwritten` | Uncommitted work. `git add .` then `git commit -m "..."` first, then retry the merge. |
 | `Committing is not possible… unmerged files` | Resolved but not staged. `git add .` |
 | Vim opens on the merge commit | Git pre-fills the message. **Esc**, `:wq`, Enter. |
 | "Do I open a second PR?" | No — pushing updates the existing one. |

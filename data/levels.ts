@@ -4,6 +4,7 @@ import {
   Fingerprint,
   GitMerge,
   ShieldCheck,
+  Sparkles,
   Split,
   Wrench,
   GitBranch,
@@ -13,7 +14,7 @@ import {
 } from "lucide-react";
 
 /** Where the real PR gets opened. Change this to your event repo. */
-export const REPO_URL = "https://github.com/your-org/first-pr-festival";
+export const REPO_URL = "https://github.com/Jay-Naik2526/first-pr-festival";
 export const PR_URL = `${REPO_URL}/compare`;
 
 export type ValidationResult = {
@@ -286,17 +287,18 @@ export const LEVELS: Level[] = [
     lore: [
       "You're inside. But you're a nobody here — no mask, no signal, no file.",
       "Gwen's voice cuts through the static: \"Nobody hands you a suit. Every Spider-Person in this archive wove their own.\"",
-      "Your suit is one HTML file. The markup is the fabric. The CSS is the colour. Nobody else gets a say in how it looks.",
-      "There's a blank one waiting: _template.html. Copy it, rename it to your username, and make it yours.",
-      "Two rules the loom enforces: keep the CSS inside the file, and no JavaScript. Everything else is yours.",
+      "Two things live in your file now. A JSON record — the raw data the archive indexes you by. And an HTML card — the suit everyone else actually sees.",
+      "Copy _template.json for your identity record. Copy _template.html and weave it into a suit nobody else has.",
+      "Two rules the loom enforces on the HTML: keep the CSS inside the file, and no JavaScript. Everything else is yours.",
     ],
-    objective: "Copy _template.html to spider-society/<your-github-username>.html and make it yours.",
+    objective: "Create spider-society/<your-github-username>.json AND .html — your data and your suit.",
     fieldOps: [
       "Open the cloned folder in VS Code.",
+      "Copy spider-society/_template.json, rename to <your-github-username>.json, fill in name/alias/skills/suitColor/githubUsername.",
       "Copy spider-society/_template.html and rename it to <your-github-username>.html",
-      "Fill in the four data- attributes at the top — the roster reads those.",
+      "Fill in the four data- attributes at the top of the HTML — they must match your JSON.",
       "Point the avatar <img> at https://github.com/<your-github-username>.png",
-      "Now restyle it. Colours, fonts, gradients, borders — go as far as you want.",
+      "Now restyle the HTML. Colours, fonts, gradients, borders — go as far as you want.",
       "Preview it in the Suit Weaver on the right, then hit Suit Woven.",
     ],
     expectedDisplay: "weave your card in the Suit Weaver",
@@ -763,7 +765,7 @@ export const LEVELS: Level[] = [
     troubleshoot: [
       {
         symptom: "error: Your local changes would be overwritten",
-        fix: "You have unsaved-but-modified work. Commit it first, or run git stash to park it.",
+        fix: "You have unsaved-but-modified work. Commit it first — same git add . then git commit -m \"...\" you already know — then try the merge again.",
       },
       {
         symptom: "Merge said 'Already up to date'",
@@ -917,9 +919,99 @@ export const LEVELS: Level[] = [
     successLines: [
       "Merge pushed. Your Pull Request updated itself — no second PR needed.",
       "You branched, you collided, you resolved, you sealed.",
-      "That is the entire day-to-day of a working engineer.",
+      "One more thing, if you want it — the archive never really closes.",
     ],
     xp: 350,
+  },
+  {
+    id: 10,
+    act: 2,
+    codename: "ONE MORE WEB-SHOT",
+    title: "Leave Your Mark",
+    dimension: "EARTH-1610",
+    villain: "THE ENCORE",
+    icon: Sparkles,
+    accent: "#FF3B3B",
+    lore: [
+      "The symbiote is purged. The timeline is sealed. Most people would stop here.",
+      "But Gwen catches you before you close the laptop: \"You know the archive lets you keep going, right? One more pass, whenever you want.\"",
+      "Nothing new to learn. Just the same three moves you've already got cold — stage it, commit it, send it — one more time, on something that's purely yours.",
+      "Go back into your card. Add one small flourish that says you survived today: a badge, a ribbon, a line of text, a glow — whatever feels like a victory lap.",
+      "Then stage it, commit it, push it. Exactly like Chapter 3, 4, and 5. You already know how.",
+    ],
+    objective: "Add a small victory flourish to your card, then stage, commit, and push it — same commands as before.",
+    fieldOps: [
+      "Open your <username>.html in VS Code.",
+      "Add something small and yours: a badge, a corner ribbon, an extra line, a glow effect — pure CSS, no new rules beyond what Chapter 2 already had.",
+      "Save the file.",
+      "Run: git add .",
+      "Run: git commit -m \"Add a victory flourish\"",
+      "Run: git push",
+    ],
+    expectedDisplay: "git add .",
+    hints: [
+      "Same three commands as Chapters 3, 4, and 5 — nothing new here.",
+      "Not sure what to add? A small \"⚡ Verified\" tag in a corner is enough.",
+      "git add .  →  git commit -m \"...\"  →  git push",
+    ],
+    kind: "terminal",
+    stages: [
+      {
+        label: "Stage the flourish",
+        expectedDisplay: "git add .",
+        successLine: ">> FLOURISH STAGED.",
+        hints: ["Same as Chapter 3: git add ."],
+        validate: (raw) => {
+          const input = strip(raw);
+          if (/^git\s+add\s+(\.|-A|--all|\S+)$/i.test(input)) {
+            return { ok: true, message: "Staged. One more snapshot coming up." };
+          }
+          return { ok: false, message: "Anomaly detected. Invalid command." };
+        },
+      },
+      {
+        label: "Commit it",
+        expectedDisplay: 'git commit -m "your message"',
+        successLine: ">> FLOURISH COMMITTED.",
+        hints: ['Same as Chapter 4: git commit -m "..."'],
+        validate: (raw) => {
+          const m = raw.trim().match(/^git\s+commit\s+-m\s+(["'])(.*?)\1\s*$/i);
+          if (m && m[2].trim()) {
+            return { ok: true, message: `Committed "${m[2]}" — a small, permanent, extra flex.` };
+          }
+          return { ok: false, nearMiss: true, message: 'Commit with a message: git commit -m "Add a victory flourish"' };
+        },
+      },
+      {
+        label: "Send it up",
+        expectedDisplay: "git push",
+        successLine: ">> BROADCAST. Your existing Pull Request just got a little better.",
+        hints: ["Same as Chapter 5: git push"],
+        validate: (raw) => {
+          const input = strip(raw);
+          if (/^git\s+push(\s+.*)?$/i.test(input)) {
+            return { ok: true, message: "Pushed. Same PR, a little more you in it." };
+          }
+          return { ok: false, nearMiss: true, message: "Send it up: git push" };
+        },
+      },
+    ],
+    troubleshoot: [
+      {
+        symptom: "I don't know what to add",
+        fix: "Keep it tiny — a corner badge, a border glow, a one-line tagline. The point is the commit cycle, not the design.",
+      },
+      {
+        symptom: "nothing to commit, working tree clean",
+        fix: "You didn't save the file after editing it in VS Code, or you're editing a different file than the one you pushed this morning.",
+      },
+    ],
+    successTitle: "YOU LEFT YOUR MARK",
+    successLines: [
+      "Fork, weave, stage, commit, push, branch, merge, resolve, seal — and now, once more, just because you could.",
+      "That loop — stage it, commit it, send it — is the one you'll run a thousand times as an engineer. You've got it now.",
+    ],
+    xp: 250,
   },
 ];
 
@@ -946,7 +1038,10 @@ export const ACT_TWO = LEVELS.filter((l) => l.act === 2);
  * only the command, never the prose after it.
  */
 export function extractCommand(line: string): string | null {
-  const m = line.match(/^(git|xcode-select|cd|npm)\s[^(]*/);
+  // Not anchored to the start of the line — several Field Ops lines lead with
+  // prose ("Set your name: git config …", "Check it worked: git --version")
+  // and the command still deserves a copy button.
+  const m = line.match(/\b(git|xcode-select|cd|npm)\s[^(]*/);
   if (!m) return null;
   const cmd = m[0].trim().replace(/[.,;:]$/, "");
   return cmd.length > 3 ? cmd : null;

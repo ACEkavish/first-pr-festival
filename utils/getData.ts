@@ -143,18 +143,23 @@ export function getSpiderSociety(): SpiderMember[] {
         continue;
       }
       const suit = attr(raw, "suit");
+      const key = githubUsername.toLowerCase();
+      // A paired .json is read first in the loop above — inherit its skills
+      // (and its suitColor, unless the card set its own) so a hand-woven
+      // card still contributes to "Unique Abilities" / "Top Ability" on the
+      // hero stats bar instead of always reporting an empty skill set.
+      const existing = members.findIndex((m) => m.githubUsername.toLowerCase() === key);
+      const paired = existing >= 0 ? members[existing] : null;
       const member: SpiderMember = {
         name,
         alias,
-        skills: [],
-        suitColor: HEX.test(suit) ? suit : FALLBACK_COLOR,
+        skills: paired?.skills ?? [],
+        suitColor: HEX.test(suit) ? suit : paired?.suitColor ?? FALLBACK_COLOR,
         githubUsername,
         fileName: file,
         dimension: dimensionFor(githubUsername),
         html: sanitizeCardHtml(raw),
       };
-      const key = githubUsername.toLowerCase();
-      const existing = members.findIndex((m) => m.githubUsername.toLowerCase() === key);
       if (existing >= 0) members[existing] = member;
       else members.push(member);
       seen.add(key);
@@ -179,7 +184,11 @@ export function getSocietyStats(members: SpiderMember[]) {
 
   return {
     anomaliesMerged: members.length,
-    dimensions: new Set(members.map((m) => m.dimension)).size,
+    // "Dimensions Linked" used to be near-identical to anomaliesMerged
+    // (dimension is a hash of the username, so it's ~1:1 with headcount).
+    // Hand-woven count is genuinely different information, and it's a fun
+    // one to watch climb during Act I as students discover the HTML card.
+    handWoven: members.filter((m) => Boolean(m.html)).length,
     uniqueSkills: new Set(skills).size,
     topSkill,
   };

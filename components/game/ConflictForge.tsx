@@ -39,6 +39,18 @@ export default function ConflictForge() {
 
     const skills = Array.isArray(parsed?.skills) ? (parsed!.skills as unknown[]) : null;
 
+    // JSON.parse silently keeps the LAST occurrence of a duplicate key, so a
+    // student who deletes only the three marker lines — and leaves both the
+    // HEAD and symbiote blocks intact — still gets valid JSON with a single
+    // "alias" and "skills" in the parsed object. That defeats the entire
+    // lesson of this chapter (decide, don't just delete markers), so count
+    // raw key occurrences in the SOURCE TEXT, before parsing collapses them.
+    const aliasOccurrences = (text.match(/"alias"\s*:/g) ?? []).length;
+    const skillsOccurrences = (text.match(/"skills"\s*:/g) ?? []).length;
+    const suitColorOccurrences = (text.match(/"suitColor"\s*:/g) ?? []).length;
+    const hasDuplicateKeys =
+      aliasOccurrences > 1 || skillsOccurrences > 1 || suitColorOccurrences > 1;
+
     return [
       {
         label: "Markers removed",
@@ -54,15 +66,21 @@ export default function ConflictForge() {
       },
       {
         label: "One identity, not two",
-        ok: parsed !== null && typeof parsed.alias === "string" && skills?.length === 3,
+        ok:
+          parsed !== null &&
+          !hasDuplicateKeys &&
+          typeof parsed.alias === "string" &&
+          skills?.length === 3,
         detail:
           parsed === null
             ? "Fix the JSON first."
-            : typeof parsed.alias !== "string"
-              ? "Needs exactly one alias."
-              : skills?.length !== 3
-                ? `Needs exactly 3 skills — found ${skills?.length ?? 0}.`
-                : "One alias, three skills. Decision made.",
+            : hasDuplicateKeys
+              ? "Both blocks are still in there — the file has the same key twice. Delete one whole side, not just the marker lines."
+              : typeof parsed.alias !== "string"
+                ? "Needs exactly one alias."
+                : skills?.length !== 3
+                  ? `Needs exactly 3 skills — found ${skills?.length ?? 0}.`
+                  : "One alias, three skills. Decision made.",
       },
     ];
   }, [text]);

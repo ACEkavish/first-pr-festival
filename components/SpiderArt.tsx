@@ -63,8 +63,8 @@ export function SpiderMask({ className = "" }: { className?: string }) {
               key={`r-${i}`}
               x1="100"
               y1="72"
-              x2={100 + 190 * Math.cos(angle - Math.PI)}
-              y2={72 + 190 * Math.sin(angle - Math.PI) * -1}
+              x2={(100 + 190 * Math.cos(angle - Math.PI)).toFixed(3)}
+              y2={(72 + 190 * Math.sin(angle - Math.PI) * -1).toFixed(3)}
             />
           );
         })}
@@ -114,8 +114,8 @@ export function WebCorner({
           key={`s-${i}`}
           x1="0"
           y1="0"
-          x2={R * Math.cos(a)}
-          y2={R * Math.sin(a)}
+          x2={(R * Math.cos(a)).toFixed(3)}
+          y2={(R * Math.sin(a)).toFixed(3)}
           stroke="rgba(232,230,227,0.85)"
           strokeWidth="1.6"
         />
