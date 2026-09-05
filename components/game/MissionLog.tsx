@@ -11,8 +11,7 @@ import {
   Target,
 } from "lucide-react";
 import { WebCorner } from "@/components/SpiderArt";
-import CopyButton from "@/components/CopyButton";
-import { extractCommand, personalize, PR_URL, REPO_URL } from "@/data/levels";
+import { personalize, PR_URL, REPO_URL } from "@/data/levels";
 import { useGame } from "@/context/GameContext";
 
 /** Sporadic flicker — an unstable portal, not a strobe. */
@@ -135,14 +134,6 @@ export default function MissionLog() {
                     />
                   ))}
                 </div>
-                <div className="mt-3 flex items-center gap-2 rounded bg-black/50 px-2.5 py-1.5">
-                  <code className="flex-1 font-mono text-xs text-web-scarlet [overflow-wrap:anywhere]">
-                    {stage.expectedDisplay}
-                  </code>
-                  {extractCommand(stage.expectedDisplay) && (
-                    <CopyButton text={extractCommand(stage.expectedDisplay)!} />
-                  )}
-                </div>
               </div>
             )}
 
@@ -160,30 +151,20 @@ export default function MissionLog() {
                 Field Ops — do these for real
               </p>
               <ol className="space-y-2">
-                {level.fieldOps.map((step, i) => {
-                  const command = extractCommand(say(step));
-                  return (
-                    <li
-                      key={step}
-                      className="group/op flex gap-3 rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-sm text-silk/80 transition duration-200 hover:translate-x-1 hover:border-web-red/40 hover:bg-web-red/[0.07] hover:text-silk"
+                {level.fieldOps.map((step, i) => (
+                  <li
+                    key={step}
+                    className="flex gap-3 rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-sm text-silk/80 transition duration-200 hover:translate-x-1 hover:border-web-red/40 hover:bg-web-red/[0.07] hover:text-silk"
+                  >
+                    <span
+                      className="mt-0.5 font-mono text-xs font-bold"
+                      style={{ color: level.accent }}
                     >
-                      <span
-                        className="mt-0.5 font-mono text-xs font-bold"
-                        style={{ color: level.accent }}
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span className="flex-1 [overflow-wrap:anywhere]">{say(step)}</span>
-                      {command && (
-                        <CopyButton
-                          text={command}
-                          label={command}
-                          className="opacity-0 transition group-hover/op:opacity-100 focus:opacity-100"
-                        />
-                      )}
-                    </li>
-                  );
-                })}
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="flex-1 [overflow-wrap:anywhere]">{say(step)}</span>
+                  </li>
+                ))}
               </ol>
             </div>
 

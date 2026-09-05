@@ -1,16 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SpiderEmblem, WebCorner } from "@/components/SpiderArt";
-import { getStages, LEVELS } from "@/data/levels";
 
 export const metadata: Metadata = {
-  title: "Git-Verse Cheat Sheet | First PR Festival",
-  description: "One-page command reference for all eleven chapters across two acts. Print it.",
+  title: "Git-Verse Command Reference | First PR Festival",
+  description: "A flat glossary of every Git command used today. What each one does — not when to use it.",
 };
+
+/**
+ * Deliberately NOT generated from data/levels.ts. A per-chapter breakdown
+ * doubles as an answer key (objective + exact command, chapter by chapter).
+ * This is a flat glossary instead: what a command does, never which puzzle
+ * it solves or in what order. Figuring out where each one applies is the
+ * point of the game.
+ */
+const COMMANDS: { cmd: string; does: string }[] = [
+  { cmd: "git --version", does: "Prints the installed Git version." },
+  { cmd: 'git config --global user.name "..."', does: "Sets the name attached to every commit you make." },
+  { cmd: 'git config --global user.email "..."', does: "Sets the email attached to every commit you make." },
+  { cmd: "git clone <url>", does: "Downloads a copy of a repository onto your machine." },
+  { cmd: "git status", does: "Shows what's changed, what's staged, and what branch you're on." },
+  { cmd: "git add <file>", does: "Stages a specific file's changes." },
+  { cmd: "git add .", does: "Stages every changed file in the current folder." },
+  { cmd: 'git commit -m "message"', does: "Saves a permanent snapshot of everything currently staged." },
+  { cmd: "git push", does: "Uploads your local commits to the remote repository." },
+  { cmd: "git branch", does: "Lists your branches. The one with * is where you are." },
+  { cmd: "git checkout <branch>", does: "Switches to a branch that already exists." },
+  { cmd: "git checkout -b <branch>", does: "Creates a new branch and switches to it in one step." },
+  { cmd: "git merge <branch>", does: "Combines another branch's history into the one you're on." },
+];
 
 export default function CheatSheet() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10 print:max-w-none print:px-0 print:py-0">
+    <main className="mx-auto max-w-2xl px-6 py-10 print:max-w-none print:px-0 print:py-0">
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 print:hidden">
         <WebCorner className="absolute -left-16 -top-16 h-[36rem] w-[36rem]" opacity={0.4} />
       </div>
@@ -19,8 +41,8 @@ export default function CheatSheet() {
         <div>
           <div className="flex items-center gap-3">
             <SpiderEmblem className="h-8 w-8 text-web-red" color="currentColor" />
-            <h1 className="font-display text-4xl uppercase leading-none tracking-wide text-silk print:text-black">
-              Git-Verse Cheat Sheet
+            <h1 className="font-display text-3xl uppercase leading-none tracking-wide text-silk print:text-black sm:text-4xl">
+              Command Reference
             </h1>
           </div>
           <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-silk-dim print:text-neutral-600">
@@ -37,84 +59,26 @@ export default function CheatSheet() {
         </div>
       </header>
 
-      <div className="space-y-6 print:space-y-4">
-        {[1, 2].map((act) => (
-          <section key={act}>
-            <h2 className="mb-3 font-display text-2xl uppercase tracking-wide text-web-red print:text-black">
-              Act {act} — {act === 1 ? "Your First Pull Request" : "The Symbiote"}
-            </h2>
-            <div className="space-y-2.5">
-              {LEVELS.filter((l) => l.act === act).map((level) => {
-                const commands = getStages(level)
-                  .map((s) => s.expectedDisplay)
-                  .filter((c) => !c.startsWith("no command") && !c.startsWith("resolve"));
-                return (
-                  <div
-                    key={level.id}
-                    className="break-inside-avoid rounded-lg border border-white/10 bg-white/[0.02] p-3.5 print:border-neutral-300 print:bg-white"
-                  >
-                    <div className="flex flex-wrap items-baseline gap-x-3">
-                      <span className="font-display text-lg text-web-scarlet print:text-black">
-                        {level.id}
-                      </span>
-                      <span className="font-display text-lg uppercase tracking-wide text-silk print:text-black">
-                        {level.codename}
-                      </span>
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-silk-faint print:text-neutral-500">
-                        {level.title}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-silk/75 print:text-neutral-700">
-                      {level.objective}
-                    </p>
-                    {commands.length > 0 ? (
-                      <ul className="mt-2 space-y-1">
-                        {commands.map((cmd) => (
-                          <li
-                            key={cmd}
-                            className="rounded bg-black/50 px-2.5 py-1 font-mono text-[13px] text-web-scarlet print:bg-neutral-100 print:text-black"
-                          >
-                            {cmd}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 font-mono text-xs italic text-silk-faint print:text-neutral-500">
-                        No command — done in your editor / in the browser.
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+      <p className="mb-6 text-sm text-silk/70 print:text-neutral-700">
+        Every command used today, what it does — nothing about which chapter needs it or in what
+        order. That part's yours to work out.
+      </p>
+
+      <ul className="space-y-2">
+        {COMMANDS.map(({ cmd, does }) => (
+          <li
+            key={cmd}
+            className="flex flex-col gap-1 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3 print:border-neutral-300 print:bg-white sm:flex-row sm:items-baseline sm:gap-4"
+          >
+            <code className="shrink-0 rounded bg-black/50 px-2 py-0.5 font-mono text-[13px] text-web-scarlet print:bg-neutral-100 print:text-black sm:min-w-[280px]">
+              {cmd}
+            </code>
+            <span className="text-sm text-silk/75 print:text-neutral-700">{does}</span>
+          </li>
         ))}
-      </div>
+      </ul>
 
-      <section className="mt-8 break-inside-avoid rounded-lg border border-web-red/30 bg-web-red/[0.05] p-4 print:border-neutral-400 print:bg-white">
-        <h2 className="font-display text-xl uppercase tracking-wide text-web-red print:text-black">
-          When it goes wrong
-        </h2>
-        <dl className="mt-3 grid gap-x-8 gap-y-2.5 sm:grid-cols-2">
-          {[
-            ["Terminal filled with text, can't type", "You're in vim. Press Esc, type :q! and Enter."],
-            ["Please tell me who you are", "Run the two git config --global commands from Chapter 0."],
-            ["It wants a password", "GitHub doesn't take passwords. Use a Personal Access Token as the password."],
-            ["no upstream branch", "git push -u origin main"],
-            ["pathspec 'main' did not match", "Your branch is called master. Use that instead."],
-            ["nothing to commit", "You didn't save the file in VS Code."],
-            ["unmerged files", "You resolved the conflict but forgot: git add ."],
-            ["Which branch am I on?", "git branch — the one with the * beside it."],
-          ].map(([symptom, fix]) => (
-            <div key={symptom}>
-              <dt className="font-mono text-xs text-web-scarlet print:text-black">{symptom}</dt>
-              <dd className="text-sm text-silk/75 print:text-neutral-700">{fix}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-silk-faint print:text-neutral-500">
+      <p className="mt-8 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-silk-faint print:text-neutral-500">
         With great power comes great responsibility — not root access.
       </p>
     </main>

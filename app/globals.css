@@ -26,6 +26,22 @@ body {
   overflow-x: hidden;
 }
 
+/* JetBrains Mono ships ligatures for "--", "->", "!=", etc. — a font ligature
+   fuses two real hyphen characters into one glyph on screen. Students typing
+   `git --version` or `git config --global` would SEE one dash while TWO real
+   characters exist underneath, then "fix" the apparent typo by adding a
+   third real hyphen, breaking the command. Disable ligatures everywhere
+   monospace text appears so what's on screen always matches what was typed. */
+.font-mono,
+input,
+textarea,
+code,
+pre {
+  font-variant-ligatures: none;
+  -webkit-font-feature-settings: "liga" 0, "calt" 0;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
 ::selection {
   background: var(--red);
   color: #fff;

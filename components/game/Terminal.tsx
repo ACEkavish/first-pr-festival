@@ -11,7 +11,7 @@ const PROMPT = "miles@earth-1610:~$";
 
 /** Easter-egg commands. Not required to win — just rewards for poking around. */
 const EASTER_EGGS: Record<string, string> = {
-  help: "Commands: hint · clear · whoami · ls · status · lore · sudo · exit — everything else, Git handles.",
+  help: "Commands: hint · lyla · clear · whoami · ls · status · lore · sudo · exit — everything else, Git handles.",
   whoami: "You're the one who got bit. Everything after that was a choice.",
   ls: "spider-society/  app/  components/  .git/  <- that hidden folder is the whole multiverse",
   lore: "Every Spider-Person's story starts the same way. That's not a bug. That's the canon.",
@@ -63,8 +63,7 @@ export default function Terminal() {
         pushHistory({ kind: "system", text: `>> ${stageCount} checks in this chapter.` });
       }
       pushHistory({ kind: "lore", text: `>> Step 1/${stageCount} — ${stage.label}` });
-      pushHistory({ kind: "lore", text: `>> Awaiting: ${stage.expectedDisplay}` });
-      pushHistory({ kind: "system", text: ">> Type 'hint' if the web-line snaps." });
+      pushHistory({ kind: "system", text: ">> Type 'hint' for a nudge, or 'lyla' to pull up the command reference." });
     } else if (level.kind === "conflict" || level.kind === "weave") {
       pushHistory({ kind: "lore", text: ">> Resolve the conflict in the forge. This terminal is idle." });
     } else {
@@ -108,6 +107,21 @@ export default function Terminal() {
 
     if (lower === "hint" || lower === "help me") {
       pushHistory({ kind: "warn", text: `[LYLA] ${useHint()}` });
+      return;
+    }
+
+    if (lower === "lyla") {
+      pushHistory({ kind: "warn", text: "[LYLA] Pulling up the command reference for you." });
+      // An <a target="_blank"> click is honored more reliably than a raw
+      // window.open() across browsers with strict popup blocking (Safari in
+      // particular) — some venue laptops lock this down hard.
+      const link = document.createElement("a");
+      link.href = "/cheatsheet";
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
       return;
     }
 
@@ -158,7 +172,6 @@ export default function Terminal() {
             kind: "lore",
             text: `>> Step ${stageIndex + 2}/${stageCount} — ${next.label}`,
           });
-          pushHistory({ kind: "lore", text: `>> Awaiting: ${next.expectedDisplay}` });
         }
       }
     } else {
